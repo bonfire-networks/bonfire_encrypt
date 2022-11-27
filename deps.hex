@@ -1,0 +1,5 @@
+faker = "~> 0.14" # fake data generation
+jason = "~> 1.0"
+# ed25519 = "1.4.1"
+# olm = "0.1.0-rc"
+puid = "~> 2.0"
