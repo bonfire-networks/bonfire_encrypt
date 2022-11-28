@@ -199,14 +199,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
                 <.section_header>Actions</.section_header>
                 <.action_panel burned_at={@burned_at} />
               <% :receiver -> %>
-              <!-- <%= <.section_header>Online now</.section_header>
-              <Bonfire.Encrypt.Web.UserListComponent.view
-                :if={not is_nil(@current_user)}
-                self={@current_user.id}
-                live_action={@live_action}
-                users={@users}
-                burned_at={@burned_at}
-              /> %> -->
+             
 
             <% end %>
           </div>
