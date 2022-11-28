@@ -158,15 +158,15 @@ defmodule Bonfire.Encrypt.Web.PageLive do
     <div class="min-h-full">
       <div class="pb-32">
         <header class="py-10">
-          <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <h1 class="text-3xl font-bold tracking-tight">Live Secret</h1>
           </div>
         </header>
       </div>
 
       <main class="-mt-32">
-        <div class="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
-          <div class="rounded-lg  px-5 py-6 shadow sm:px-6">
+        <div class="px-4 pb-12 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div class="px-5 py-6 rounded-lg shadow sm:px-6">
             <%= case @special_action do %>
               <% :decrypting -> %>
                 <% secret = Bonfire.Encrypt.Secret.get_secret!(@id) %>
@@ -196,15 +196,6 @@ defmodule Bonfire.Encrypt.Web.PageLive do
                   enabled={is_nil(@burned_at)}
                 />
 
-                <%!-- <.section_header>Online now</.section_header>
-                <Bonfire.Encrypt.Web.UserListComponent.view
-                  :if={not is_nil(@current_user)}
-                  self={@current_user.id}
-                  live_action={@live_action}
-                  users={@users}
-                  burned_at={@burned_at}
-                /> --%>
-
                 <.section_header>Actions</.section_header>
                 <.action_panel burned_at={@burned_at} />
               <% :receiver -> %>
@@ -233,7 +224,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
         <%= if @live_action == :admin do %>
           <% oob_url = build_external_url(@to) %>
 
-          <div class="w-full flex justify-center items-center align-center">
+          <div class="flex items-center justify-center w-full align-center">
             <button
               type="button"
               class={" inline-flex items-center justify-center rounded-md border border-transparent px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm "<> if @enabled, do: "", else: "line-through"}
@@ -271,12 +262,12 @@ defmodule Bonfire.Encrypt.Web.PageLive do
 
   defp copiable(assigns) do
     ~H"""
-    <li class="flex flex-nowrap my-2">
+    <li class="flex my-2 flex-nowrap">
       <button
         :if={@type != :hidden}
         type="button"
         disabled={not @enabled}
-        class="inline-flex items-center rounded-l-md border border-r-0  px-3 sm:text-sm"
+        class="inline-flex items-center px-3 border border-r-0 rounded-l-md sm:text-sm"
         phx-click={if @enabled, do: JS.dispatch("live-secret:clipcopy", to: "##{@id}")}
       >
         <.action_icon has_text={false} id={:clipboard} />
@@ -329,10 +320,10 @@ defmodule Bonfire.Encrypt.Web.PageLive do
         From: "opacity-100"
         To: "opacity-0"
     -->
-      <div class="fixed inset-0 bg-opacity-75 transition-opacity"></div>
+      <div class="fixed inset-0 transition-opacity bg-opacity-75"></div>
 
       <div class="fixed inset-0 z-10 overflow-y-auto">
-        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center">
+        <div class="flex items-end justify-center min-h-full p-4 text-center sm:items-center">
           <!--
           Modal panel, show/hide based on modal state.
 
@@ -343,12 +334,12 @@ defmodule Bonfire.Encrypt.Web.PageLive do
             From: "opacity-100 translate-y-0 sm:scale-100"
             To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         -->
-          <div class="relative transform overflow-hidden rounded-lg  px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full md:w-2/3 sm:p-6">
+          <div class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform rounded-lg shadow-xl sm:my-8 sm:w-full md:w-2/3 sm:p-6">
             <div>
-              <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+              <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
                 <!-- Heroicon name: outline/lock-open -->
                 <svg
-                  class="h-6 w-6 text-red-600"
+                  class="w-6 h-6 text-red-600"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -373,7 +364,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
                     type="text"
                     name="passphrase"
                     id="passphrase"
-                    class="block w-full rounded-full px-4 shadow-sm sm:text-sm"
+                    class="block w-full px-4 rounded-full shadow-sm sm:text-sm"
                     placeholder="Passphrase"
                     autocomplete="off"
                   />
@@ -396,7 +387,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
               />
             </div>
             <div id="decryptionfailure-div-for-ignore" phx-update="ignore">
-              <div id="decryptionfailure-container" class="hidden text-center pt-1">
+              <div id="decryptionfailure-container" class="hidden pt-1 text-center">
                 <div class="inline-flex">
                   <div class="block pr-2">
                     <p class="text-md ">Incorrect passphrase - try again</p>
@@ -415,12 +406,12 @@ defmodule Bonfire.Encrypt.Web.PageLive do
                 <textarea
                   id="cleartext"
                   readonly
-                  class="block w-full resize-none rounded-md ring-0 font-mono"
+                  class="block w-full font-mono rounded-md resize-none ring-0"
                 />
-                <div class="p-4 w-full flex justify-center items-center align-center">
+                <div class="flex items-center justify-center w-full p-4 align-center">
                   <button
                     type="button"
-                    class="inline-flex items-center justify-center rounded-md border border-transparent px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm "
+                    class="inline-flex items-center justify-center px-4 py-2 font-medium border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm "
                     phx-click={JS.dispatch("live-secret:clipcopy", to: "#cleartext")}
                   >
                     Copy to clipboard <.action_icon has_text={true} id={:clipboard} />
@@ -447,7 +438,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
               <button
                 type="button"
                 id="decrypt-btn"
-                class="btn btn-success inline-flex w-full sm:col-start-2"
+                class="inline-flex w-full btn btn-success sm:col-start-2"
                 phx-click={JS.dispatch("live-secret:decrypt-secret")}
               >
                 Decrypt
@@ -455,7 +446,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
               <button
                 type="button"
                 id="close-btn"
-                class="btn btn-warning inline-flex w-full"
+                class="inline-flex w-full btn btn-warning"
                 phx-click={JS.hide(to: "#decrypt-modal")}
               >
                 Close
@@ -492,16 +483,16 @@ defmodule Bonfire.Encrypt.Web.PageLive do
 
   defp action_item(assigns) do
     ~H"""
-    <li class="col-span-1 rounded-lg  shadow">
-      <div class="flex w-full items-center justify-between space-x-6 p-6">
+    <li class="col-span-1 rounded-lg shadow">
+      <div class="flex items-center justify-between w-full p-6 space-x-6">
         <div class="flex-1">
           <div class="flex items-center space-x-3">
-            <h3 class="truncate text-sm font-medium "><%= @title %></h3>
+            <h3 class="text-sm font-medium truncate "><%= @title %></h3>
           </div>
           <p class="mt-1 text-sm "><%= @description %></p>
         </div>
       </div>
-      <div class="inline-flex w-full items-center justify-center pb-4">
+      <div class="inline-flex items-center justify-center w-full pb-4">
         <button
           type="button"
           class={"#{@action_class} inline-flex items-center justify-center rounded-md border border-transparent px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm "<> if @action_enabled, do: "", else: "line-through"}
@@ -590,7 +581,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
 
   defp section_header(assigns) do
     ~H"""
-    <div class="mx-auto max-w-7xl pt-4 px-4">
+    <div class="px-4 pt-4 mx-auto max-w-7xl">
       <h2 class="text-lg font-bold leading-tight tracking-tight ">
         <%= render_slot(@inner_block) %>
       </h2>
