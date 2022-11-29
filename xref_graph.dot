@@ -1,0 +1,28 @@
+digraph "xref graph" {
+  "lib/fake.ex"
+  "lib/integration.ex"
+  "lib/live_secret/expiration.ex"
+  "lib/live_secret/expiration.ex" -> "lib/live_secret/pubsub.ex"
+  "lib/live_secret/pubsub.ex" -> "lib/live_secret/secret.ex"
+  "lib/live_secret/secret.ex" -> "lib/live_secret/presecret.ex"
+  "lib/live_secret/presecret.ex" -> "lib/live_secret/operational_key.ex"
+  "lib/live_secret/secret.ex" -> "lib/live_secret/pubsub.ex"
+  "lib/live_secret/expiration.ex" -> "lib/live_secret/secret.ex" [label="(export)"]
+  "lib/live_secret/operational_key.ex"
+  "lib/live_secret/presecret.ex"
+  "lib/live_secret/pubsub.ex"
+  "lib/live_secret/secret.ex"
+  "lib/migrations.ex"
+  "lib/web/components/secret_form_live.ex"
+  "lib/web/live_handler.ex"
+  "lib/web/live_handler.ex" -> "lib/live_secret/presecret.ex"
+  "lib/web/live_handler.ex" -> "lib/live_secret/pubsub.ex"
+  "lib/web/live_handler.ex" -> "lib/live_secret/secret.ex" [label="(export)"]
+  "lib/web/page_live.ex"
+  "lib/web/page_live.ex" -> "lib/live_secret/presecret.ex"
+  "lib/web/page_live.ex" -> "lib/live_secret/secret.ex" [label="(export)"]
+  "lib/web/page_live.ex" -> "lib/web/components/secret_form_live.ex"
+  "lib/web/page_live.ex" -> "lib/web/live_handler.ex"
+  "lib/web/routes.ex"
+  "lib/web/static.ex"
+}

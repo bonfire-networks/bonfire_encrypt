@@ -87,8 +87,10 @@ async function DecryptSecret() {
   var ciphertextEl = document.getElementById("ciphertext");
   var ivEl = document.getElementById("iv");
   var passphraseEl = document.getElementById("passphrase");
-  var cleartextEl = document.getElementById("cleartext");
+
   var cleartextDivEl = document.getElementById("cleartext-container");
+  var cleartextEl = document.getElementById("cleartext");
+
   var decryptionfailureDivEl = document.getElementById("decryptionfailure-container");
   var failCounterEl = document.getElementById("fail-counter");
 
