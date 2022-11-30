@@ -199,8 +199,6 @@ defmodule Bonfire.Encrypt.Web.PageLive do
                 <.section_header>Actions</.section_header>
                 <.action_panel burned_at={@burned_at} />
               <% :receiver -> %>
-             
-
             <% end %>
           </div>
         </div>
