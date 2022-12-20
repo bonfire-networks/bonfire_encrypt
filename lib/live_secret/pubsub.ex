@@ -1,7 +1,7 @@
 defmodule Bonfire.Encrypt.PubSub do
   alias Bonfire.Encrypt.Secret
 
-  @pubsub Bonfire.PubSub
+  @pubsub Bonfire.Common.PubSub
 
   @doc """
   Subscribe to secret
