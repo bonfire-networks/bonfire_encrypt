@@ -7,7 +7,7 @@ defmodule Bonfire.Encrypt.Secret do
     source: "bonfire_encrypt_secret"
 
   import Ecto.Query, only: [from: 2]
-  import Untangle
+  # import Untangle
 
   alias Bonfire.Encrypt.Secret
   alias Bonfire.Encrypt.Presecret
@@ -17,7 +17,7 @@ defmodule Bonfire.Encrypt.Secret do
   @maxcontentsize 4096
   @ivsize 12
 
-  alias Ecto.Changeset
+  # alias Ecto.Changeset
 
   mixin_schema do
     field :burn_key, :string, redact: true

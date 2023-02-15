@@ -1,7 +1,7 @@
 defmodule Bonfire.Encrypt.Migrations do
   use Ecto.Migration
   import Pointers.Migration
-  alias Bonfire.Encrypt.Secret
+  # alias Bonfire.Encrypt.Secret
 
   # create_secret_table/{0,1}
 

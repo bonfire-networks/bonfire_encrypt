@@ -1,8 +1,8 @@
 defmodule Bonfire.Encrypt.LiveHandler do
   use Bonfire.UI.Common.Web, :live_handler
 
-  alias Phoenix.LiveView.JS
-  alias Bonfire.Encrypt.Web.{SecretFormComponent, ActiveUser}
+  # alias Phoenix.LiveView.JS
+  # alias Bonfire.Encrypt.Web.{SecretFormComponent, ActiveUser}
   alias Bonfire.Encrypt.{Presecret, Secret}
 
   require Logger
@@ -48,7 +48,7 @@ defmodule Bonfire.Encrypt.LiveHandler do
         "burn",
         params,
         socket = %{
-          assigns: %{id: id, current_user: current_user, live_action: live_action} = assigns
+          assigns: %{id: id, current_user: current_user, live_action: live_action} = _assigns
         }
       ) do
     secret = Bonfire.Encrypt.Secret.get_secret!(id)
