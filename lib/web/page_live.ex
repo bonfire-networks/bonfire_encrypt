@@ -9,6 +9,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
 
   require Logger
 
+  @impl true
   def mount(params, session, socket) do
     live_plug(params, session, socket, [
       LivePlugs.LoadCurrentAccount,
@@ -20,7 +21,6 @@ defmodule Bonfire.Encrypt.Web.PageLive do
     ])
   end
 
-  @impl true
   defp mounted(%{"id" => id, "key" => key}, %{}, socket = %{assigns: %{live_action: :admin}}) do
     case read_secret_or_redirect(socket, id) do
       secret = %Secret{} ->
@@ -112,13 +112,15 @@ defmodule Bonfire.Encrypt.Web.PageLive do
       ) do
     case current_user.id do
       ^user_id ->
-        if Bonfire.Encrypt.Web.Presence.on_unlocked(id, users[user_id]) do
-          {:noreply,
-           socket
-           |> assign(special_action: :decrypting)}
-        else
-          {:noreply, socket}
-        end
+        # TODO!
+        # if Bonfire.Encrypt.Web.Presence.on_unlocked(id, users[user_id]) do
+        #   {:noreply,
+        #    socket
+        #    |> assign(special_action: :decrypting)}
+        # else
+        {:noreply, socket}
+
+      # end
 
       _ ->
         {:noreply, socket}
@@ -150,6 +152,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
      |> push_navigate(to: Routes.page_path(socket, :create))}
   end
 
+  @impl true
   defdelegate handle_event(a, b, c), to: LiveHandler
 
   @impl true

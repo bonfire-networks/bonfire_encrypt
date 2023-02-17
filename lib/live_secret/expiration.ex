@@ -1,9 +1,9 @@
 defmodule Bonfire.Encrypt.Expiration do
   require Logger
-
+  import Bonfire.Encrypt.Integration
   import Ecto.Query, only: [from: 2]
 
-  alias Bonfire.Encrypt.{Repo, Secret}
+  alias Bonfire.Encrypt.Secret
 
   def setup_job() do
     config = Application.fetch_env!(:livesecret, Bonfire.Encrypt.Expiration)
@@ -22,14 +22,14 @@ defmodule Bonfire.Encrypt.Expiration do
   def expire_before(now) do
     ids =
       from(s in Secret, where: s.expires_at < ^now, select: s.id)
-      |> Repo.all()
+      |> repo().all()
 
     deleted =
       ids
       |> Enum.reduce(
         [],
         fn id, del_acc ->
-          case Repo.delete(%Secret{id: id}) do
+          case repo().delete(%Secret{id: id}) do
             {:ok, _} ->
               Bonfire.Encrypt.PubSub.notify_expired(id)
               [id | del_acc]

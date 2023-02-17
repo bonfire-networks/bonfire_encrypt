@@ -7,8 +7,6 @@ defmodule Bonfire.Encrypt.LiveHandler do
 
   require Logger
 
-  @impl true
-
   # Validates form data during secret creation
   def handle_event(
         "validate",
