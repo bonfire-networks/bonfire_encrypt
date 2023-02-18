@@ -108,9 +108,9 @@ defmodule Bonfire.Encrypt.Web.PageLive do
   # should do anything with it.
   def handle_info(
         {:unlocked, user_id},
-        socket = %{assigns: %{current_user: current_user, id: id, users: users}}
+        socket = %{assigns: %{current_user: current_user, id: _id, users: _users}}
       ) do
-    case current_user.id do
+    case id(current_user) do
       ^user_id ->
         # TODO!
         # if Bonfire.Encrypt.Web.Presence.on_unlocked(id, users[user_id]) do
