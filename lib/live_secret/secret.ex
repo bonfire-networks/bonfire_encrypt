@@ -79,7 +79,7 @@ defmodule Bonfire.Encrypt.Secret do
   Burned secrets have no iv and no ciphertext
   """
   def do_burn!(secret) do
-    burned_at = NaiveDateTime.utc_now()
+    burned_at = NaiveDateTime.utc_now(Calendar.ISO)
 
     secret
     |> Secret.changeset(%{

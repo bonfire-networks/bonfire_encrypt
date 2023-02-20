@@ -11,7 +11,7 @@ defmodule Bonfire.Encrypt.Expiration do
   end
 
   def expire() do
-    now = NaiveDateTime.utc_now()
+    now = NaiveDateTime.utc_now(Calendar.ISO)
     expire_before(now)
   end
 

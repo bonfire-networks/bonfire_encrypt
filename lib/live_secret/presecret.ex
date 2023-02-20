@@ -37,7 +37,7 @@ defmodule Bonfire.Encrypt.Presecret do
           "duration" => duration
         }
       ) do
-    now = NaiveDateTime.utc_now()
+    now = NaiveDateTime.utc_now(Calendar.ISO)
 
     %{
       id: attrs["id"] || generate_id(),

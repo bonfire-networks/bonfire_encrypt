@@ -596,7 +596,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
   # end
 
   # defp handle_leaves(socket, leaves) do
-  #   left_at = NaiveDateTime.utc_now()
+  #   left_at = NaiveDateTime.utc_now(Calendar.ISO)
 
   #   Enum.reduce(leaves, socket, fn {user_id, _}, socket ->
   #     users = socket.assigns.users
@@ -626,7 +626,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
   #     id: user[:id],
   #     name: user[:name],
   #     live_action: live_action,
-  #     joined_at: NaiveDateTime.utc_now(),
+  #     joined_at: NaiveDateTime.utc_now(Calendar.ISO),
   #     state: if(live?, do: :locked, else: :unlocked)
   #   }
 
