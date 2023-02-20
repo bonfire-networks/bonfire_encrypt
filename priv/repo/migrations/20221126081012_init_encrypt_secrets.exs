@@ -1,4 +1,5 @@
-defmodule Bonfire.Encrypt.Repo.Migrations.InitSecret do
+defmodule Bonfire.Encrypt.Repo.Migrations.InitSecret  do
+  @moduledoc false
   use Ecto.Migration
   require Bonfire.Encrypt.Migrations
 

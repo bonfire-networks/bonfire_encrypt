@@ -1,4 +1,5 @@
 defmodule Bonfire.Encrypt.Migrations do
+  @moduledoc false
   use Ecto.Migration
   import Pointers.Migration
   # alias Bonfire.Encrypt.Secret
