@@ -1,6 +1,5 @@
 defmodule Bonfire.Encrypt.Web.PageLive do
   use Bonfire.UI.Common.Web, :live_view
-  alias Bonfire.UI.Me.LivePlugs
 
   alias Phoenix.LiveView.JS
   alias Bonfire.Encrypt.{Presecret, Secret}
@@ -10,18 +9,9 @@ defmodule Bonfire.Encrypt.Web.PageLive do
   require Logger
 
   @impl true
-  def mount(params, session, socket) do
-    live_plug(params, session, socket, [
-      LivePlugs.LoadCurrentAccount,
-      LivePlugs.LoadCurrentUser,
-      Bonfire.UI.Common.LivePlugs.StaticChanged,
-      Bonfire.UI.Common.LivePlugs.Csrf,
-      Bonfire.UI.Common.LivePlugs.Locale,
-      &mounted/3
-    ])
-  end
+  on_mount {LivePlugs, [Bonfire.UI.Me.LivePlugs.LoadCurrentUser]}
 
-  defp mounted(%{"id" => id, "key" => key}, %{}, socket = %{assigns: %{live_action: :admin}}) do
+  def mount(%{"id" => id, "key" => key}, %{}, socket = %{assigns: %{live_action: :admin}}) do
     case read_secret_or_redirect(socket, id) do
       secret = %Secret{} ->
         {
@@ -39,7 +29,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
     end
   end
 
-  defp mounted(%{"id" => id}, %{}, socket = %{assigns: %{live_action: :receiver}}) do
+  def mount(%{"id" => id}, %{}, socket = %{assigns: %{live_action: :receiver}}) do
     case read_secret_or_redirect(socket, id) do
       secret = %Secret{} ->
         {
@@ -56,7 +46,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
     end
   end
 
-  defp mounted(_params, %{}, socket = %{assigns: %{live_action: :create}}) do
+  def mount(_params, %{}, socket = %{assigns: %{live_action: :create}}) do
     {:ok,
      socket
      |> assign(page_title: "Live Secret")
