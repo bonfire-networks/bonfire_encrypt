@@ -50,7 +50,7 @@ defmodule Bonfire.Encrypt.Presecret do
   end
 
   defp generate_id do
-    Pointers.Pointer.create(Bonfire.Data.Social.Message)
+    Needle.Pointer.create(Bonfire.Data.Social.Message)
     |> Bonfire.Common.Repo.insert!()
     |> Map.get(:id)
   end

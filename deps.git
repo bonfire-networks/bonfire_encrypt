@@ -1,4 +1,3 @@
 bonfire_ui_common = "https://github.com/bonfire-networks/bonfire_ui_common#main"
-pointers = "https://github.com/bonfire-networks/pointers#main"
 # olm = "https://github.com/niklaslong/olm-elixir#master"
 # polyjuice_newt = "https://gitlab.com/polyjuice/polyjuice_newt#develop"

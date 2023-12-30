@@ -2,7 +2,7 @@ defmodule Bonfire.Encrypt.Secret do
   @moduledoc """
   A mixin that stores [metadata about] encrypted secrets
   """
-  use Pointers.Mixin,
+  use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_encrypt_secret"
 

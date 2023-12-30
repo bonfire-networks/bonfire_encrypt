@@ -1,16 +1,16 @@
 defmodule Bonfire.Encrypt.Migrations do
   @moduledoc false
   use Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   # alias Bonfire.Encrypt.Secret
 
   # create_secret_table/{0,1}
 
   defp make_secret_table(exprs) do
     quote do
-      require Pointers.Migration
+      require Needle.Migration
 
-      Pointers.Migration.create_mixin_table Bonfire.Encrypt.Secret do
+      Needle.Migration.create_mixin_table Bonfire.Encrypt.Secret do
         add(:creator_key, :string)
         add(:burn_key, :string)
         add(:content, :binary)
