@@ -15,7 +15,7 @@ defmodule Bonfire.Encrypt.DataCase do
   """
 
   use ExUnit.CaseTemplate
-  import Bonfire.Encrypt.Integration
+  import Bonfire.Encrypt
 
   using do
     quote do

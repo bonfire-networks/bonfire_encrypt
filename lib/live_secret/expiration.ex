@@ -1,6 +1,6 @@
 defmodule Bonfire.Encrypt.Expiration do
   require Logger
-  import Bonfire.Encrypt.Integration
+  import Bonfire.Encrypt
   import Ecto.Query, only: [from: 2]
 
   alias Bonfire.Encrypt.Secret

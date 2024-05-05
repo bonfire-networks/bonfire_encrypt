@@ -6,7 +6,7 @@ defmodule Bonfire.Encrypt.Test.FakeHelpers do
 
   import ExUnit.Assertions
 
-  import Bonfire.Encrypt.Integration
+  import Bonfire.Encrypt
 
   import Bonfire.Encrypt.Fake
 end
