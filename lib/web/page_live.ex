@@ -581,7 +581,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
   # defp handle_joins(socket, joins) do
   #   Enum.reduce(joins, socket, fn {user_id, %{metas: [active_user = %ActiveUser{} | _]}},
   #                                 socket ->
-  #     assign(socket, :users, Map.put(socket.assigns.users, user_id, active_user))
+  #     assign(socket, :users, Map.put(assigns(socket).users, user_id, active_user))
   #   end)
   # end
 
@@ -589,9 +589,9 @@ defmodule Bonfire.Encrypt.Web.PageLive do
   #   left_at = NaiveDateTime.utc_now(Calendar.ISO)
 
   #   Enum.reduce(leaves, socket, fn {user_id, _}, socket ->
-  #     users = socket.assigns.users
+  #     users = assigns(socket).users
 
-  #     case socket.assigns.users[user_id] do
+  #     case assigns(socket).users[user_id] do
   #       nil ->
   #         socket
 
