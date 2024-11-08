@@ -11,12 +11,12 @@ import Config
 import_config "bonfire_encrypt.exs"
 
 config :bonfire_common,
-  otp_app: :bonfire
+  otp_app: :bonfire_encrypt,
+  localisation_path: "priv/localisation"
 
 config :bonfire,
-  otp_app: :bonfire,
-  default_layout_module: Bonfire.UI.Common.LayoutView,
-  localisation_path: "priv/localisation"
+  otp_app: :bonfire_encrypt,
+  default_layout_module: Bonfire.UI.Common.LayoutView
 
 hasher = if config_env() in [:dev, :test], do: Pbkdf2, else: Argon2
 
