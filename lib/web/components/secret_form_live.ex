@@ -16,7 +16,7 @@ defmodule Bonfire.Encrypt.Web.SecretFormLive do
       autocomplete="off"
     >
       <div class="overflow-hidden rounded-lg border shadow-sm  focus-within:ring-1 ">
-        <%= label(f, :content, class: "block text-xs font-medium  pt-2 px-2") %>
+        {label(f, :content, class: "block text-xs font-medium  pt-2 px-2")}
         <div phx-update="ignore" id="cleartext-div-for-ignore">
           <textarea
             id="cleartext"
@@ -24,9 +24,9 @@ defmodule Bonfire.Encrypt.Web.SecretFormLive do
             placeholder="Put your secret information here..."
           />
         </div>
-        <%= hidden_input(f, :content, id: "ciphertext") %>
-        <%= hidden_input(f, :iv, id: "iv") %>
-        <%= hidden_input(f, :burn_key, id: "burnkey") %>
+        {hidden_input(f, :content, id: "ciphertext")}
+        {hidden_input(f, :iv, id: "iv")}
+        {hidden_input(f, :burn_key, id: "burnkey")}
         <!-- Spacer element to match the height of the toolbar -->
         <.spacer />
       </div>
@@ -67,7 +67,7 @@ defmodule Bonfire.Encrypt.Web.SecretFormLive do
           <% choice = Ecto.Changeset.fetch_field!(@changeset, @field) %>
           <.toolbar_icon id={@icon} choice={choice} />
           <span class="hidden truncate sm:ml-2 sm:block"><.choice_text v={choice} /></span>
-          <%= hidden_input(@f, @field, id: "#{@field}") %>
+          {hidden_input(@f, @field, id: "#{@field}")}
         </button>
 
         <ul

@@ -412,7 +412,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
             </div>
 
             <.form :let={f} for={@changeset} phx-change="burn" autocomplete="off">
-              <%= hidden_input(f, :burn_key, id: "burnkey") %>
+              {hidden_input(f, :burn_key, id: "burnkey")}
             </.form>
 
             <div
@@ -472,9 +472,9 @@ defmodule Bonfire.Encrypt.Web.PageLive do
       <div class="flex items-center justify-between w-full p-6 space-x-6">
         <div class="flex-1">
           <div class="flex items-center space-x-3">
-            <h3 class="text-sm font-medium truncate "><%= @title %></h3>
+            <h3 class="text-sm font-medium truncate ">{@title}</h3>
           </div>
-          <p class="mt-1 text-sm "><%= @description %></p>
+          <p class="mt-1 text-sm ">{@description}</p>
         </div>
       </div>
       <div class="inline-flex items-center justify-center w-full pb-4">
@@ -484,7 +484,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
           phx-click={if @action_enabled, do: @action_click}
           disabled={not @action_enabled}
         >
-          <%= @action_text %>
+          {@action_text}
           <.action_icon :if={not is_nil(@action_icon)} has_text={true} id={@action_icon} />
         </button>
       </div>
@@ -568,7 +568,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
     ~H"""
     <div class="px-4 pt-4 mx-auto max-w-7xl">
       <h2 class="text-lg font-bold leading-tight tracking-tight ">
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </h2>
     </div>
     """
