@@ -23,6 +23,8 @@ defmodule Bonfire.Encrypt.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       # import Bonfire.Encrypt.DataCase
+
+      @moduletag :backend
     end
   end
 
