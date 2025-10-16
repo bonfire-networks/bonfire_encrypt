@@ -11,7 +11,7 @@ defmodule Bonfire.Encrypt.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use MyApp.Web.ConnCase, async: true`, although
+  by setting `use MyApp.Web.ConnCase, async: System.get_env("TEST_UI_ASYNC") != "no"`, although
   this option is not recommended for other databases.
   """
 
@@ -23,7 +23,7 @@ defmodule Bonfire.Encrypt.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import Phoenix.LiveViewTest
-      # import Bonfire.Encrypt.ConnCase, async: true
+      # import Bonfire.Encrypt.ConnCase, async: System.get_env("TEST_UI_ASYNC") != "no"
 
       import Bonfire.Encrypt.Test.ConnHelpers
       import Bonfire.Encrypt.Test.FakeHelpers
