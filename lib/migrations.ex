@@ -12,10 +12,8 @@ defmodule Bonfire.Encrypt.Migrations do
 
       Needle.Migration.create_mixin_table Bonfire.Encrypt.Secret do
         add(:creator_key, :string)
-        add(:burn_key, :string)
         add(:content, :binary)
         add(:iv, :binary)
-        add(:burned_at, :naive_datetime)
         add(:expires_at, :naive_datetime)
 
         unquote_splicing(exprs)

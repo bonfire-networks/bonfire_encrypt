@@ -3,22 +3,12 @@ defmodule Bonfire.Encrypt.LiveHandler do
 
   # alias Phoenix.LiveView.JS
   # alias Bonfire.Encrypt.Web.{SecretFormComponent, ActiveUser}
-  alias Bonfire.Encrypt.{Presecret, Secret}
+  alias Bonfire.Encrypt.Secret
 
   require Logger
 
-  # Validates form data during secret creation
-  def handle_event(
-        "validate",
-        %{"presecret" => attrs},
-        socket = %{assigns: %{changeset: _changeset}}
-      ) do
-    changeset = Presecret.validate_presecret(attrs)
-    {:noreply, assign(socket, changeset: changeset)}
-  end
-
   # Submit form data for secret creation
-  def handle_event("create", %{"presecret" => attrs}, socket) do
+  def handle_event("create", attrs, socket) do
     secret = %Secret{id: id, creator_key: creator_key} = Bonfire.Encrypt.Secret.insert!(attrs)
 
     {:noreply,
@@ -41,43 +31,67 @@ defmodule Bonfire.Encrypt.LiveHandler do
     {:noreply, socket}
   end
 
-  # Burn the secret so that no one else can access it
-  def handle_event(
-        "burn",
-        params,
-        socket = %{
-          assigns: %{id: id, current_user: current_user, live_action: live_action} = _assigns
-        }
-      ) do
-    secret = Bonfire.Encrypt.Secret.get_secret!(id)
+  def handle_event("clear-flash", _params, socket) do
+    {:noreply, clear_flash(socket)}
+  end
 
-    # if assert_burnkey_match(params, secret) and
-    #      live_action === :receiver do
-    #   Bonfire.Encrypt.Web.Presence.on_revealed(id, assigns[:users][current_user.id])
-    # end
+  # Handle onboarding_status event from client (OpenMLS onboarding feedback)
+  def handle_event("onboarding_status", %{"status" => status} = params, socket) do
+    socket =
+      socket
+      |> assign(:onboarding_status, status)
+      |> assign(:onboarding_error, Map.get(params, "error"))
 
-    if assert_burnable(live_action, params, secret) do
-      secret = Bonfire.Encrypt.Secret.burn!(secret, burned_by: current_user.id)
+    {:noreply, socket}
+  end
 
-      {:noreply,
-       socket
-       |> assign_secret_metadata(secret)
-       |> put_burn_flash()}
-    else
-      {:noreply, socket}
-    end
+  # Handle group_status event from client (OpenMLS group feedback)
+  def handle_event("group_status", %{"status" => status} = params, socket) do
+    socket =
+      socket
+      |> assign(:group_status, status)
+      |> assign(:group_error, Map.get(params, "error"))
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("set_group", %{"group_id" => group_id}, socket) do
+    # Update the group id and reset group status to pending
+    {:noreply,
+     socket
+     |> assign(id: group_id, group_status: :pending, error: nil)}
+  end
+
+  @impl true
+  def handle_event("copy_invite_link", _params, socket) do
+    # Generate a real OpenMLS welcome message for the group (replace with real logic)
+    group_id = socket.assigns[:id]
+    welcome_message = Base.encode64("welcome-for-" <> (group_id || ""))
+
+    invite_url =
+      Routes.page_url(socket, :create) <>
+        "?group_id=" <> (group_id || "") <> "&welcome=" <> welcome_message
+
+    {:noreply, assign(socket, invite_link: invite_url)}
+  end
+
+  def handle_event("accept_invite", _params, socket) do
+    # Accept the invite and join the group using the welcome message
+    # Here you would call your OpenMLS backend logic to process the welcome message and add the user to the group
+    # For demo, we just mark the group as ready
+    # In production, decode and process the welcome message, update group state, etc.
+    {:noreply, assign(socket, group_status: :ready, error: nil, welcome_message: nil)}
   end
 
   def assign_secret_metadata(socket, %Secret{
         id: id,
-        creator_key: creator_key,
-        burned_at: burned_at
+        creator_key: creator_key
       }) do
     socket
     |> assign(
       id: id,
-      creator_key: creator_key,
-      burned_at: burned_at
+      creator_key: creator_key
     )
   end
 
@@ -85,43 +99,5 @@ defmodule Bonfire.Encrypt.LiveHandler do
     result = Bonfire.Encrypt.Secret.get_secret!(id)
     ^key = result.creator_key
     socket
-  end
-
-  def assert_burnkey_match(params, secret) do
-    burn_key = params["secret"]["burn_key"]
-
-    case secret.burn_key do
-      ^burn_key ->
-        true
-
-      _ ->
-        false
-    end
-  end
-
-  def assert_burnable(live_action, params, secret) do
-    case live_action do
-      :admin ->
-        true
-
-      _ ->
-        assert_burnkey_match(params, secret)
-    end
-  end
-
-  def put_burn_flash(socket = %{assigns: %{live_action: :admin}}) do
-    socket
-    |> put_flash(
-      :info,
-      "Burned. Encrypted content deleted from server. Close this window."
-    )
-  end
-
-  def put_burn_flash(socket = %{assigns: %{live_action: :receiver}}) do
-    socket
-    |> put_flash(
-      :info,
-      "The secret content has been deleted from the server. Please close this window."
-    )
   end
 end

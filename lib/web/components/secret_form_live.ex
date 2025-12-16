@@ -2,103 +2,55 @@ defmodule Bonfire.Encrypt.Web.SecretFormLive do
   use Phoenix.Component
   import Phoenix.HTML.Form
   alias Phoenix.LiveView.JS
+  import Bonfire.UI.Common.CoreComponents
 
   def create(assigns) do
     ~H"""
+    <%!--
+      WARNING: This form is intentionally crippled to prevent any browser or JS submission of plaintext.
+      All submission is handled by the EncryptSecret hook via pushEvent.
+    --%>
     <.form
       :let={f}
+      id="secret-form"
       for={@changeset}
-      action="#"
+      action="javascript:void(0);"
+      method="post"
       class="relative"
       id="secret-form"
-      phx-change="validate"
-      phx-submit="create"
       autocomplete="off"
+      novalidate
+      phx-hook="EncryptSecret"
+      data-encrypt-fields="content"
+      data-group="default-group"
+      data-forward-event="create"
     >
+      <%!-- WARNING: make sure to not directly call LiveView events which may send secret data to the server! Let EncryptSecret take care of that. 
+      phx-change="validate"
+      phx-submit="create" --%>
       <div class="overflow-hidden rounded-lg border shadow-sm  focus-within:ring-1 ">
-        {label(f, :content, class: "block text-xs font-medium  pt-2 px-2")}
+        <.label field={f[:content]} class="block text-xs font-medium  pt-2 px-2">
+          Write your secret
+        </.label>
         <div phx-update="ignore" id="cleartext-div-for-ignore">
           <textarea
             id="cleartext"
+            name="content"
             class="h-24 sm:h-64 pt-3 block w-full resize-y border-0 py-0 placeholder-gray-500 focus:ring-0 font-mono"
             placeholder="Put your secret information here..."
           />
         </div>
-        {hidden_input(f, :content, id: "ciphertext")}
-        {hidden_input(f, :iv, id: "iv")}
-        {hidden_input(f, :burn_key, id: "burnkey")}
+        <.input type="hidden" field={f[:content]} id="ciphertext" />
         <!-- Spacer element to match the height of the toolbar -->
         <.spacer />
       </div>
 
       <div class="absolute inset-x-px bottom-0">
-        <div class="flex flex-nowrap justify-end space-x-2 py-2 px-2 sm:px-3">
-          <.param_choice
-            f={f}
-            changeset={@changeset}
-            list={@durations}
-            field={:duration}
-            icon={:calendar}
-          />
-        </div>
-
         <div class="flex items-center justify-between space-x-3 border-t border-gray-200 px-2 py-2 sm:px-3">
-          <.passphrase_entry />
           <.create_button />
         </div>
       </div>
     </.form>
-    """
-  end
-
-  def param_choice(assigns) do
-    ~H"""
-    <div class="flex-shrink-0">
-      <label id={"listbox-label-#{@field}"} class="sr-only"> Add an expiration </label>
-      <div class="relative">
-        <button
-          type="button"
-          class="relative inline-flex items-center whitespace-nowrap rounded-full py-2 px-2 text-sm font-medium sm:px-3"
-          aria-haspopup="listbox"
-          aria-expanded="true"
-          aria-labelledby={"listbox-label-#{@field}"}
-          phx-click={JS.toggle(to: "##{@field}-popover")}
-        >
-          <% choice = Ecto.Changeset.fetch_field!(@changeset, @field) %>
-          <.toolbar_icon id={@icon} choice={choice} />
-          <span class="hidden truncate sm:ml-2 sm:block"><.choice_text v={choice} /></span>
-          {hidden_input(@f, @field, id: "#{@field}")}
-        </button>
-
-        <ul
-          id={"#{@field}-popover"}
-          class="hidden absolute right-0 z-10 mt-1 max-h-56 w-52 overflow-auto rounded-lg  py-3 text-base shadow ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-          tabindex="-1"
-          role="listbox"
-          aria-labelledby={"listbox-label-#{@field}"}
-          aria-activedescendant="listbox-option-0"
-          phx-click-away={JS.hide(to: "##{@field}-popover")}
-        >
-          <%= for item <- @list do %>
-            <li
-              class=" relative cursor-default select-none py-2 px-3 "
-              role="option"
-              phx-click={
-                JS.hide(to: "##{@field}-popover")
-                |> JS.dispatch("live-secret:select-choice",
-                  to: "##{@field}",
-                  detail: %{"value" => item}
-                )
-              }
-            >
-              <div class="flex items-center">
-                <span class="block truncate font-medium"><.choice_text v={item} /></span>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-      </div>
-    </div>
     """
   end
 
@@ -169,32 +121,14 @@ defmodule Bonfire.Encrypt.Web.SecretFormLive do
     """
   end
 
-  def passphrase_entry(assigns) do
-    ~H"""
-    <div class="flex w-full">
-      <div class="w-full">
-        <label class="block text-xs font-medium ">Passphrase</label>
-        <div phx-update="ignore" id="passphrase-div-for-ignore">
-          <input
-            type="text"
-            ,
-            id="passphrase"
-            class="block w-full border-0 text-sm font-medium placeholder-gray-500 focus:ring-0 font-mono"
-            placeholder="(generated)"
-          />
-        </div>
-      </div>
-    </div>
-    """
-  end
+  # passphrase_entry removed for OpenMLS
 
   def create_button(assigns) do
     ~H"""
     <div class="flex-shrink-0">
       <button
-        type="button"
+        type="submit"
         class="inline-flex items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm  focus:outline-none focus:ring-2  focus:ring-offset-2"
-        phx-click={JS.dispatch("live-secret:create-secret")}
       >
         Encrypt
       </button>

@@ -2,7 +2,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
   use Bonfire.UI.Common.Web, :live_view
 
   alias Phoenix.LiveView.JS
-  alias Bonfire.Encrypt.{Presecret, Secret}
+  alias Bonfire.Encrypt.Secret
   alias Bonfire.Encrypt.LiveHandler
   alias Bonfire.Encrypt.Web.SecretFormLive
 
@@ -46,13 +46,24 @@ defmodule Bonfire.Encrypt.Web.PageLive do
     end
   end
 
-  def mount(_params, %{}, socket = %{assigns: %{live_action: :create}}) do
+  def mount(params, %{}, socket = %{assigns: %{live_action: :create}}) do
+    group_id = Map.get(params, "group_id")
+    welcome_message = Map.get(params, "welcome")
+
     {:ok,
      socket
      |> assign(page_title: "Live Secret")
      |> LiveHandler.assign_secret_metadata(%Secret{})
      |> assign(special_action: nil)
-     |> assign(changeset: Presecret.changeset(Presecret.new(), %{}))}
+     |> assign(changeset: Secret.changeset(Secret.new(), %{}))
+     |> assign(
+       onboarding_status: :pending,
+       group_status: nil,
+       error: nil,
+       id: group_id,
+       welcome_message: welcome_message,
+       invite_link: nil
+     )}
   end
 
   @impl true
@@ -117,23 +128,6 @@ defmodule Bonfire.Encrypt.Web.PageLive do
     end
   end
 
-  # All subscribers are informed the secret has been burned
-  def handle_info(
-        {:burned, burned_at, burned_by: burned_by},
-        socket = %{assigns: %{current_user: current_user}}
-      ) do
-    case current_user.id do
-      ^burned_by ->
-        {:noreply, socket}
-
-      _ ->
-        {:noreply,
-         socket
-         |> assign(burned_at: burned_at)
-         |> LiveHandler.put_burn_flash()}
-    end
-  end
-
   # All subscribers are informed the secret has been expired
   def handle_info(:expired, socket) do
     {:noreply,
@@ -148,13 +142,67 @@ defmodule Bonfire.Encrypt.Web.PageLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-full">
+    <div
+      class="min-h-full"
+      id="encryption-group-root"
+      phx-hook="EncryptionGroup"
+      data-user-label={@current_user && @current_user.id}
+      data-group={@id}
+    >
       <div class="pb-32">
         <header class="py-10">
           <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <h1 class="text-3xl font-bold tracking-tight">Live Secret</h1>
           </div>
         </header>
+      </div>
+
+      <.onboarding_banner onboarding_status={@onboarding_status} />
+      <.group_banner group_status={@group_status} />
+      <.error_banner error={@error} />
+
+      <div class="mb-6 flex flex-col items-center">
+        <form phx-submit="set_group" class="flex gap-2 items-center">
+          <input
+            type="text"
+            name="group_id"
+            value={@id || ""}
+            placeholder="Enter group name or ID"
+            class="input input-bordered"
+            required
+          />
+          <button type="submit" class="btn btn-primary">Create/Join Group</button>
+        </form>
+        <div class="text-xs text-gray-500 mt-1">
+          Choose a group to create or join a secure session.
+        </div>
+
+        <%= if @id && @group_status == :ready do %>
+          <div class="mt-4 flex flex-col items-center">
+            <button type="button" class="btn btn-secondary" phx-click="copy_invite_link">
+              Copy Invite Link
+            </button>
+            <input
+              type="text"
+              id="invite-link-hidden"
+              value={@invite_link || ""}
+              readonly
+              style="position:absolute;left:-9999px;"
+            />
+            <div class="text-xs text-gray-500 mt-1">
+              Share this link to invite others to your group.
+            </div>
+          </div>
+        <% end %>
+
+        <%= if @welcome_message do %>
+          <div class="mt-4 flex flex-col items-center">
+            <div class="alert alert-info">You have been invited to join group <b>{@id}</b>.</div>
+            <button type="button" class="btn btn-primary" phx-click="accept_invite">
+              Join Group
+            </button>
+          </div>
+        <% end %>
       </div>
 
       <main class="-mt-32">
@@ -171,27 +219,16 @@ defmodule Bonfire.Encrypt.Web.PageLive do
               <% _ -> %>
             <% end %>
 
-            <%= case @live_action do %>
-              <% :create -> %>
-                <.secret_links
-                  live_action={@live_action}
-                  to={Routes.page_path(@socket, :receiver, "dne")}
-                  enabled={is_nil(@burned_at)}
-                />
-                <SecretFormLive.create
-                  changeset={@changeset}
-                  durations={Presecret.supported_durations()}
-                />
-              <% :admin -> %>
-                <.secret_links
-                  live_action={@live_action}
-                  to={Routes.page_path(@socket, :receiver, @id)}
-                  enabled={is_nil(@burned_at)}
-                />
-
-                <.section_header>Actions</.section_header>
-                <.action_panel burned_at={@burned_at} />
-              <% :receiver -> %>
+            <%= case @special_action do %>
+              <% :decrypting -> %>
+                <div id="decrypt-secret" phx-hook="DecryptSecret" data-group={@id}>
+                  <div
+                    data-ciphertext={@secret.content}
+                    class="font-mono whitespace-pre-wrap break-all"
+                  >
+                  </div>
+                </div>
+              <% _ -> %>
             <% end %>
           </div>
         </div>
@@ -200,90 +237,58 @@ defmodule Bonfire.Encrypt.Web.PageLive do
     """
   end
 
-  # Rendered for live_action = :create | :admin so that the passphrase can be held in the DOM
-  defp secret_links(assigns) do
-    ~H"""
-    <% container_class = if @live_action == :create, do: "", else: "pt-8 px-8 pb-2" %>
-    <div class={container_class}>
-      <ul>
-        <%= if @live_action == :admin do %>
-          <% oob_url = build_external_url(@to) %>
+  # UI helper for onboarding/group status
 
-          <div class="flex items-center justify-center w-full align-center">
-            <button
-              type="button"
-              class={" inline-flex items-center justify-center rounded-md border border-transparent px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm "<> if @enabled, do: "", else: "line-through"}
-              phx-click={JS.dispatch("live-secret:clipcopy-instructions")}
-              disabled={not @enabled}
-            >
-              Copy as Markdown <.action_icon has_text={true} id={:markdown} />
-            </button>
-            <div :if={@enabled} id="show-passphrase-after-create" phx-hook="ShowPassphraseAfterCreate">
-            </div>
-          </div>
-          <.copiable
-            id="oob-url"
-            type={:text}
-            value={oob_url}
-            ignore={false}
-            enabled={@enabled}
-            placeholder=""
-          />
-        <% end %>
+  # Function components for onboarding/group/error banners
+  defp onboarding_banner(assigns) do
+    case assigns.onboarding_status do
+      :pending ->
+        ~H"""
+        <div class="alert alert-info">Generating your secure identity...</div>
+        """
 
-        <% input_type = if @live_action == :create, do: :hidden, else: :text %>
-        <.copiable
-          id="userkey-stash"
-          type={input_type}
-          value=""
-          ignore={true}
-          enabled={@enabled}
-          placeholder="<Admin must provide the passphrase>"
-        />
-      </ul>
-    </div>
-    """
+      :ready ->
+        ~H"""
+        <div class="alert alert-success">Your secure identity is ready!</div>
+        """
+
+      _ ->
+        ~H""
+    end
   end
 
-  defp copiable(assigns) do
-    ~H"""
-    <li class="flex my-2 flex-nowrap">
-      <button
-        :if={@type != :hidden}
-        type="button"
-        disabled={not @enabled}
-        class="inline-flex items-center px-3 border border-r-0 rounded-l-md sm:text-sm"
-        phx-click={if @enabled, do: JS.dispatch("live-secret:clipcopy", to: "##{@id}")}
-      >
-        <.action_icon has_text={false} id={:clipboard} />
-      </button>
+  defp group_banner(assigns) do
+    case assigns.group_status do
+      :pending ->
+        ~H"""
+        <div class="alert alert-info">Joining group...</div>
+        """
 
-      <% input_class =
-        "font-mono block w-full min-w-0 flex-1 rounded-none rounded-r-md  px-3 py-2 sm:text-sm " %>
+      :ready ->
+        ~H"""
+        <div class="alert alert-success">Group ready!</div>
+        """
 
-      <%= if @ignore do %>
-        <div phx-update="ignore" id={@id <> "-div-for-ignore"} class="w-full">
-          <input
-            type={@type}
-            id={@id}
-            disabled
-            class={input_class}
-            value={@value}
-            placeholder={@placeholder}
-          />
-        </div>
-      <% else %>
-        <input
-          type={@type}
-          id={@id}
-          disabled
-          class={input_class}
-          value={@value}
-          placeholder={@placeholder}
-        />
-      <% end %>
-    </li>
-    """
+      :waiting ->
+        ~H"""
+        <div class="alert alert-warning">Waiting for group welcome message...</div>
+        """
+
+      _ ->
+        ~H""
+    end
+  end
+
+  defp error_banner(assigns) do
+    case assigns.error do
+      nil ->
+        ~H""
+
+      msg ->
+        ~H"""
+        <div class="alert alert-error">{msg}</div>
+        """
+    end
   end
 
   defp decrypt_modal(assigns) do
@@ -393,15 +398,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
                   readonly
                   class="block w-full font-mono rounded-md resize-none ring-0"
                 />
-                <div class="flex items-center justify-center w-full p-4 align-center">
-                  <button
-                    type="button"
-                    class="inline-flex items-center justify-center px-4 py-2 font-medium border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm "
-                    phx-click={JS.dispatch("live-secret:clipcopy", to: "#cleartext")}
-                  >
-                    Copy to clipboard <.action_icon has_text={true} id={:clipboard} />
-                  </button>
-                </div>
+
                 <div class="block">
                   <p class="text-md ">Success!</p>
                   <p class="text-sm ">
@@ -411,23 +408,11 @@ defmodule Bonfire.Encrypt.Web.PageLive do
               </div>
             </div>
 
-            <.form :let={f} for={@changeset} phx-change="burn" autocomplete="off">
-              {hidden_input(f, :burn_key, id: "burnkey")}
-            </.form>
-
             <div
               id="decrypt-btns-div-for-ignore"
               phx-update="ignore"
               class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3"
             >
-              <button
-                type="button"
-                id="decrypt-btn"
-                class="inline-flex w-full btn btn-success sm:col-start-2"
-                phx-click={JS.dispatch("live-secret:decrypt-secret")}
-              >
-                Decrypt
-              </button>
               <button
                 type="button"
                 id="close-btn"
@@ -446,23 +431,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
 
   defp action_panel(assigns) do
     ~H"""
-    <div class="py-4">
-      <ul
-        role="list"
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2"
-      >
-        <.action_item
-          title="Burn this secret"
-          description="When you burn the secret, the encrypted data is deleted forever."
-          action_enabled={is_nil(@burned_at)}
-          action_text="Burn"
-          action_icon={:fire}
-          action_class="text-red-700 bg-red-100 hover:bg-red-200 focus:ring-red-500"
-          action_click="burn"
-        >
-        </.action_item>
-      </ul>
-    </div>
+    <div class="py-4"></div>
     """
   end
 
@@ -568,7 +537,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
     ~H"""
     <div class="px-4 pt-4 mx-auto max-w-7xl">
       <h2 class="text-lg font-bold leading-tight tracking-tight ">
-        {render_slot(@inner_block)}
+        {if assigns[:inner_block], do: render_slot(@inner_block), else: nil}
       </h2>
     </div>
     """

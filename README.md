@@ -4,26 +4,9 @@ Experimenting with encryption for [Bonfire](https://bonfire.cafe/). Not ready fo
 
 Based on the code of [Live Secret](https://github.com/JesseStimpson/livesecret) (by Jesse Stimpson, Apache License 2.0)
 
-<!-- ## Dependencies (no longer used, going with browser based encryption instead)
-- [A Rust implementation of Olm and Megolm]https://github.com/matrix-org/vodozemac with bindings from [polyjuice_newt](https://gitlab.com/polyjuice/polyjuice_newt)
-- [ed25519](https://hex.pm/packages/ed25519)
-- [SubtleCrypto](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto) in the user's browser with bindings copied from [livesecret](https://github.com/JesseStimpson/livesecret) -->
 
 ## How to use it
 
-<!-- The `olm` dependency requires [libolm](https://gitlab.matrix.org/matrix-org/olm) (a native C library, which is available in several distributions).
-
-On Debian one can install it like so:
-
-`apt install libolm-dev`
-
-On Alpine:
-
-`pkg install olm`
-
-On Mac:
-
-`brew install libolm` -->
 
 
 ## Copyright and License
