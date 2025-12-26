@@ -16,11 +16,32 @@ let Provider, Identity, Group, KeyPackage, RatchetTree;
 
 export async function initOpenMLS() {
   if (!openmlsWasm) {
-    openmlsWasm = await import('../../../../priv/static/assets/openmls/openmls_wasm.js');
-    // Use named imports as in the demo
-    if (openmlsWasm.default) {
-      await openmlsWasm.default('/assets/openmls/openmls_wasm_bg.wasm');
+
+    if (window.__openmls_wasm) {
+      openmlsWasm = await import('../../../../priv/static/assets/openmls/openmls_wasm.js');
+      if (openmlsWasm.default) {
+        console.log('Initializing OpenMLS WASM from preloaded binary');
+        // load from preloaded global (e.g., Tauri bundle)
+        await openmlsWasm.default(window.__openmls_wasm);
+      } else {
+        console.error('OpenMLS WASM module does not have default export for initialization');
+        return;
+      }
+    } else if (typeof window.fetch === 'function') {
+      // TODO: only load if user opts-in for less-secure remote JS/WASM loading
+      console.log('Initializing OpenMLS WASM by fetching it');
+      openmlsWasm = await import('../../../../priv/static/assets/openmls/openmls_wasm.js');
+      if (openmlsWasm.default) {
+        await openmlsWasm.default('/assets/openmls/openmls_wasm_bg.wasm');
+      }  else {
+          console.error('OpenMLS WASM module does not have default export for initialization');
+          return;
+      }
+    } else {
+      console.error('OpenMLS WASM module could not be loaded');
+      return;
     }
+    
     Provider = openmlsWasm.Provider;
     Identity = openmlsWasm.Identity;
     Group = openmlsWasm.Group;
