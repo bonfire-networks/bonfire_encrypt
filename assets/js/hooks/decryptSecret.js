@@ -1,7 +1,7 @@
 
 
-import { OpenMLS } from '../openmls.js';
-import { hexToBytes } from '../openmlsUtils.js';
+import { OpenMLS } from '../openmls/openmls.js';
+import { hexToBytes } from '../openmls/openmlsUtils.js';
 
 
 const DecryptSecret = {

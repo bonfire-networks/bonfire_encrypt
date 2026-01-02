@@ -18,7 +18,7 @@ export async function initOpenMLS() {
   if (!openmlsWasm) {
 
     if (window.__openmls_wasm) {
-      openmlsWasm = await import('../../../../priv/static/assets/openmls/openmls_wasm.js');
+      openmlsWasm = await import('../../../../../priv/static/assets/openmls/openmls_wasm.js');
       if (openmlsWasm.default) {
         console.log('Initializing OpenMLS WASM from preloaded binary');
         // load from preloaded global (e.g., Tauri bundle)
@@ -30,7 +30,7 @@ export async function initOpenMLS() {
     } else if (typeof window.fetch === 'function') {
       // TODO: only load if user opts-in for less-secure remote JS/WASM loading
       console.log('Initializing OpenMLS WASM by fetching it');
-      openmlsWasm = await import('../../../../priv/static/assets/openmls/openmls_wasm.js');
+      openmlsWasm = await import('../../../../../priv/static/assets/openmls/openmls_wasm.js');
       if (openmlsWasm.default) {
         await openmlsWasm.default('/assets/openmls/openmls_wasm_bg.wasm');
       }  else {

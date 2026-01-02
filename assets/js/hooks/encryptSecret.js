@@ -1,7 +1,7 @@
 // hooks/encryptSecret.js
 // Generic hook to encrypt marked fields in any form before forwarding to a specified LV event
-import { OpenMLS } from '../openmls.js';
-import { bytesToHex } from '../openmlsUtils.js';
+import { OpenMLS } from '../openmls/openmls.js';
+import { bytesToHex } from '../openmls/openmlsUtils.js';
 
 const EncryptSecret = {
   async mounted() {

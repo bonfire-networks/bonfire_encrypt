@@ -1,7 +1,7 @@
 // hooks/encryptionGroup.js
 // Hook to manage onboarding and group status, syncing with LiveView assigns
-import { getOrCreateUserKeyPackage, extractPublicKey } from '../openmlsUser.js';
-import { OpenMLS } from '../openmls.js';
+import { getOrCreateUserKeyPackage, extractPublicKey } from '../openmls/openmlsUser.js';
+import { OpenMLS } from '../openmls/openmls.js';
 
 const EncryptionGroup = {
   async runOnboarding() {

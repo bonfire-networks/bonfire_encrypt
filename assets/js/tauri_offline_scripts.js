@@ -1,5 +1,5 @@
-import { initOpenMLS } from './openmls.js';
-import {EncryptHooks} from "./extension.js";
+import { initOpenMLS } from './openmls/openmls.js';
+import { EncryptHooks } from "./extension.js";
 
 if (!window.liveSocket) {
     console.error("liveSocket not found on window. Make sure bonfire_live.js is loaded before tauri-local-bundle.js");
