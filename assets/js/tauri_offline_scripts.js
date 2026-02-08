@@ -1,3 +1,4 @@
+// tauri_offline_scripts.js
 import { initOpenMLS } from './openmls/openmls.js';
 import { EncryptHooks } from "./extension.js";
 
