@@ -44,7 +44,7 @@ defmodule Bonfire.Encrypt do
       Bonfire.Messages.ap_publish_prepare_metadata(subject, verb, message)
 
     # TODO: determine object type
-    object_type = if verb == :create, do: "PrivateMessage", else: "TODO"
+    object_type = if verb == :create, do: "PrivateMessage", else: err("TODO")
 
     object =
       if object_type == "PrivateMessage" do
@@ -106,7 +106,7 @@ defmodule Bonfire.Encrypt do
         %{data: %{"type" => type} = object_data} = ap_object
       )
       when type in ["PrivateMessage", "PublicMessage"] do
-    # id = e(ap_object, :pointer_id, nil) || e(ap_object, :pointer, :id, nil)
+    pointer_id = Map.get(ap_object, :pointer_id) || e(ap_object, :pointer, :id, nil)
 
     # reply_to_ap_object = Threads.reply_to_ap_object(activity_data, object_data)
     # reply_to_id = e(reply_to_ap_object, :pointer_id, nil)
@@ -119,19 +119,26 @@ defmodule Bonfire.Encrypt do
       |> debug("direct_recipients")
 
     attrs = %{
+      id: pointer_id,
       to_circles: direct_recipients,
       post_content: %{
         name: object_data["name"],
         summary: object_data["summary"],
         html_body: object_data["content"]
-      },
-      replied:
-        %{
-          # thread_id: activity.data["context"], 
-          # reply_to_id: reply_to_id
-        }
+      }
+      # replied:
+      #   %{
+      #     # thread_id: activity.data["context"],
+      #     # reply_to_id: reply_to_id
+      #   }
     }
 
-    Bonfire.Messages.send(creator, attrs)
+    # For local C2S: pass the original AP activity so Outgoing can federate it directly
+    opts =
+      if Map.get(ap_activity, :local),
+        do: [current_user: creator, from_c2s_activity: ap_activity],
+        else: creator
+
+    Bonfire.Messages.send(opts, attrs)
   end
 end
