@@ -26,7 +26,8 @@ defmodule Bonfire.Encrypt.MixProject do
       deps:
         Mess.deps([
           {:phoenix_live_reload, "~> 1.2", only: :dev},
-
+          {:activity_pub, git: "https://github.com/bonfire-networks/activity_pub",
+           optional: true, runtime: false},
           {:floki, ">= 0.0.0", only: [:dev, :test]}
         ])
     ]
