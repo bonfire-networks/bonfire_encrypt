@@ -132,7 +132,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
   def handle_info(:expired, socket) do
     {:noreply,
      socket
-     |> put_flash(:info, "The secret has expired. You've been redirected to the home page.")
+     |> assign_flash(:info, "The secret has expired. You've been redirected to the home page.")
      |> push_navigate(to: Routes.page_path(socket, :create))}
   end
 
@@ -624,7 +624,7 @@ defmodule Bonfire.Encrypt.Web.PageLive do
         Logger.info("#{id} not found: #{inspect(error)}")
 
         socket
-        |> put_flash(
+        |> assign_flash(
           :error,
           "That secret doesn't exist. You've been redirected to the home page."
         )
