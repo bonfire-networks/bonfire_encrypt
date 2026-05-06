@@ -10,6 +10,28 @@ defmodule Bonfire.Encrypt do
   import Untangle
   import ActivityPub.Config, only: [is_in: 2]
 
+  @doc """
+  Clears all key packages for a local actor by removing the `keyPackages` field
+  from the actor's extra_info and publishing an AP Update activity.
+  """
+  def clear_key_packages(%Bonfire.Data.Identity.User{} = user) do
+    user = repo().preload(user, :extra_info)
+    cleaned_info = e(user, :extra_info, :info, %{}) |> Map.delete("keyPackages")
+    Bonfire.Me.Users.update(user, %{extra_info: %{info: cleaned_info}})
+  end
+
+  def clear_key_packages(actor_or_id) do
+    with {:ok, user} <- Bonfire.Me.Users.by_username(actor_or_id) do
+      clear_key_packages(user)
+    else
+      _ ->
+        with {:ok, actor} <- ActivityPub.Actor.get_cached(ap_id: Types.uid(actor_or_id)),
+             %{pointer: %Bonfire.Data.Identity.User{} = user} <- actor do
+          clear_key_packages(user)
+        end
+    end
+  end
+
   @behaviour Bonfire.Federate.ActivityPub.FederationModules
   def federation_module,
     do: [
