@@ -6,15 +6,7 @@ Experimenting with encryption for [Bonfire](https://bonfire.cafe/). Not ready fo
 
 ## How to use it
 
-This requires https://openmls.tech wasm bindings, for now clone https://github.com/bonfire-networks/openmls/tree/wasm-bindings to `/assets/static/assets/openmls` and run:
 
-```
-cargo install wasm-pack
-
-cargo build --release --verbose --target wasm32-unknown-unknown -p openmls -F js
-
-cd openmls-wasm && ./build.sh
-```
 
 ## Copyright and License
 
