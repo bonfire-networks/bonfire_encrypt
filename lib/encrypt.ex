@@ -11,24 +11,56 @@ defmodule Bonfire.Encrypt do
   import ActivityPub.Config, only: [is_in: 2]
 
   @doc """
-  Clears all key packages for a local actor by removing the `keyPackages` field
-  from the actor's extra_info and publishing an AP Update activity.
+  Clears all key packages for a local actor by removing every member from their `keyPackages`
+  collection, federating a `Remove` for each (MLS-over-ActivityPub lifecycle).
+
+  By default also federates a `Delete` for each key package object so it becomes unavailable; pass
+  `delete: false` to only `Remove` them from the collection without deleting the objects.
   """
-  def clear_key_packages(%Bonfire.Data.Identity.User{} = user) do
-    user = repo().preload(user, :extra_info)
-    cleaned_info = e(user, :extra_info, :info, %{}) |> Map.delete("keyPackages")
-    Bonfire.Me.Users.update(user, %{extra_info: %{info: cleaned_info}})
+  def clear_key_packages(user_or_id, opts \\ [])
+
+  def clear_key_packages(%Bonfire.Data.Identity.User{} = user, opts) do
+    with {:ok, actor} <- ActivityPub.Actor.get_cached(pointer: user.id),
+         {:ok, collection} <-
+           ActivityPub.GenericCollectionStore.get_or_create_collection(
+             "keyPackages",
+             user.id,
+             actor.ap_id
+           ) do
+      delete? = Keyword.get(opts, :delete, true)
+
+      for ap_id <- ActivityPub.GenericCollectionStore.member_ap_ids(collection) do
+        # `remove` federates the Remove to followers and drops the membership
+        ActivityPub.remove(%{
+          actor: actor,
+          object: ap_id,
+          target: collection.data["id"],
+          local: true
+        })
+
+        if delete?, do: maybe_delete_key_package(ap_id)
+      end
+
+      {:ok, collection}
+    end
   end
 
-  def clear_key_packages(actor_or_id) do
+  def clear_key_packages(actor_or_id, opts) do
     with {:ok, user} <- Bonfire.Me.Users.by_username(actor_or_id) do
-      clear_key_packages(user)
+      clear_key_packages(user, opts)
     else
       _ ->
         with {:ok, actor} <- ActivityPub.Actor.get_cached(ap_id: Types.uid(actor_or_id)),
              %{pointer: %Bonfire.Data.Identity.User{} = user} <- actor do
-          clear_key_packages(user)
+          clear_key_packages(user, opts)
         end
+    end
+  end
+
+  defp maybe_delete_key_package(ap_id) do
+    case ActivityPub.Object.get_cached(ap_id: ap_id) do
+      {:ok, object} -> ActivityPub.delete(object, true)
+      _ -> :ok
     end
   end
 
