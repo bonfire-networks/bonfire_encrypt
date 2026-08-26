@@ -29,7 +29,8 @@ defmodule Bonfire.Encrypt.Migrations do
 
   # drop_secret_table/0
 
-  def drop_secret_table(), do: drop_mixin_table(AuthSecondFactor)
+  # `Bonfire.Encrypt.Secret` is what `create_secret_table/0` above makes, so it's what the rollback has to drop. This said `AuthSecondFactor` (unqualified, and from another extension entirely), which never surfaced because nothing had ever run this migration's `down`.
+  def drop_secret_table(), do: drop_mixin_table(Bonfire.Encrypt.Secret)
 
   # migrate_secret/{0,1}
 
@@ -37,7 +38,8 @@ defmodule Bonfire.Encrypt.Migrations do
 
   defp mn(:down) do
     quote do
-      Bonfire.Encrypt.Secret.Migration.drop_secret_table()
+      # `Bonfire.Encrypt.Secret.Migration` does not exist — `drop_secret_table/0` lives here
+      Bonfire.Encrypt.Migrations.drop_secret_table()
     end
   end
 
